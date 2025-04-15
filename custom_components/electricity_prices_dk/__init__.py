@@ -13,7 +13,7 @@ async def async_setup(hass, config):
     async def fetch_prices(_now):
         try:
             with async_timeout.timeout(10):
-                data = main()
+                data = await fetch_prices()
                 # Process and update states
                 hass.states.async_set(
                     f"{DOMAIN}.prices",
