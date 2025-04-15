@@ -1,0 +1,9 @@
+set_prices:
+  description: Set hourly electricity prices
+  fields:
+    prices:
+      description: List of hour and price dicts
+      example:
+      required: true
+      selector:
+        object:

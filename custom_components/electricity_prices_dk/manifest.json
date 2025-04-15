@@ -1,0 +1,10 @@
+{
+  "domain": "electricity_prices",
+  "name": "Electricity Prices",
+  "version": "1.0",
+  "documentation": "",
+  "dependencies": [],
+  "codeowners": ["@cmk2179"],
+  "config_flow": true,
+  "requirements": ["beautifulsoup4==4.13.3", "aiohttp"]
+}

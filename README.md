@@ -1,3 +1,0 @@
-# Electricity prices
-
-...
