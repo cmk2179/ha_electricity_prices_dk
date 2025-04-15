@@ -25,7 +25,6 @@ def filter_and_map_prices(area: int, includesVat: bool, data: any) -> any:
 def get_spot_prices(price_area: str, product: str, from_date: str, to_date: str) -> any:
     data = {}
 
-    # TODO: Get spot prices from strømligning - it seems they are the most accurate ones: https://stromligning.dk/api/docs/#/Prices/get_api_prices
     res = requests.get(
         f"{API_BASE}/prices?productId={product}&priceArea={price_area}&from={from_date}&to={to_date}",
         headers={
@@ -40,10 +39,8 @@ def get_spot_prices(price_area: str, product: str, from_date: str, to_date: str)
         )
     data = res.json()
 
-    # TODO: Get N1 prices from https://n1.dk/gaeldende-priser
     n1_tarifs = get_n1_tarifs()
 
-    # TODO: Add N1 prices to distribution costs (system tarif + nettarif + N1 tarif)
     prices_per_hour = {}
     for price in data["prices"]:
         n1_tarif_hour = get_tarif_for_hour(
