@@ -15,8 +15,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    product = entry.data.get("product")
-    zone = entry.data.get("zone")
+    config = {**entry.data, **entry.options}
+    product = config.get("product")
+    zone = config.get("zone")
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "product": product,

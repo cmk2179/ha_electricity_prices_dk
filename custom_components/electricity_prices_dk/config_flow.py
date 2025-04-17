@@ -1,5 +1,6 @@
 import voluptuous as vol
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.core import callback
 import logging
 from homeassistant.config_entries import ConfigEntry, OptionsFlow, ConfigFlow
 from custom_components.electricity_prices_dk.http_api import get_companies, get_zones
@@ -78,6 +79,11 @@ class ElectricityPricesConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required("zone"): vol.In(zones)}),
         )
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry):
+        return ElectricityPricesOptionsFlowHandler(config_entry)
+
 
 class ElectricityPricesOptionsFlowHandler(OptionsFlow):
     VERSION = 1
@@ -91,22 +97,21 @@ class ElectricityPricesOptionsFlowHandler(OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         # Pre-fill form with existing values
-        current = self.config_entry.options or self.config_entry.data
+        config = self.config_entry.options or self.config_entry.data
+        company_id = config.get("company", "")
+        product_id = config.get("product", "")
+        zone = config.get("zone", "")
 
         self._companies = await get_companies()
         companies = {}
         for company in self._companies:
             companies[company["_id"]] = company["name"]
 
-        company_id = current.get("company", "")
-
         self._products = self._get_products(company_id)
         products = {}
         for product in self._products:
             products[product["_id"]] = product["name"]
-        product_id = current.get("product", "")
 
-        zone = current.get("zone", "")
         zones = await get_zones()
 
         return self.async_show_form(
@@ -120,6 +125,8 @@ class ElectricityPricesOptionsFlowHandler(OptionsFlow):
             ),
         )
 
-
-async def async_get_options_flow(config_entry: ConfigEntry):
-    return ElectricityPricesOptionsFlowHandler(config_entry)
+    def _get_products(self, company_id: int):
+        for company in self._companies:
+            if company["_id"] == company_id:
+                return company["products"]
+        return []

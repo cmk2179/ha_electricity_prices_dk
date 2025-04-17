@@ -1,7 +1,14 @@
 from datetime import datetime
 import aiohttp
 from functools import reduce
-from .n1_utils import get_tarif_for_hour, get_n1_tarifs
+
+
+if __package__ is None or __package__ == "":
+    from n1_utils import get_tarif_for_hour, get_n1_tarifs
+    from consts import LOCAL_TZ
+else:
+    from .n1_utils import get_tarif_for_hour, get_n1_tarifs
+    from .consts import LOCAL_TZ
 
 API_BASE = "https://stromligning.dk/api"
 
@@ -18,7 +25,6 @@ def filter_and_map_prices(area: int, includesVat: bool, data: any) -> any:
                 date = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M")
 
                 data[date.isoformat()] = price
-
     return data
 
 
@@ -45,9 +51,8 @@ async def get_spot_prices(
 
             prices_per_hour = {}
             for price in data["prices"]:
-                n1_tarif_hour = get_tarif_for_hour(
-                    datetime.fromisoformat(price["date"]), n1_tarifs
-                )
+                date = datetime.fromisoformat(price["date"]).astimezone(LOCAL_TZ)
+                n1_tarif_hour = get_tarif_for_hour(date, n1_tarifs)
                 n1_tarif_hour_vat = 0.25 * n1_tarif_hour
                 n1_tarif_hour_total = n1_tarif_hour + n1_tarif_hour_vat
                 price["details"]["distribution"] = {

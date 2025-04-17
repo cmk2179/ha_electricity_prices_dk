@@ -90,7 +90,7 @@ def get_tarif_for_hour(date: datetime, tarifs: dict) -> float:
             # high load
             return tarifs["high_load_summer"]
         if 17 <= date.hour < 21:
-            # low load
+            # peak load
             return tarifs["peak_load_summer"]
 
     if date.month >= 1 or date.month >= 10:

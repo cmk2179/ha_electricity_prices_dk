@@ -1,11 +1,17 @@
 import sys
 from datetime import datetime, timedelta, time, timezone
 from zoneinfo import ZoneInfo
-from .http_api import get_spot_prices
+
+if __package__ is None or __package__ == "":
+    from http_api import get_spot_prices
+    from consts import LOCAL_TZ
+else:
+    from .http_api import get_spot_prices
+    from .consts import LOCAL_TZ
 
 
 async def fetch_prices(price_area: str, product: str):
-    now = datetime.now(ZoneInfo("Europe/Copenhagen"))
+    now = datetime.now(LOCAL_TZ)
     start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end_date = now.replace(hour=23, minute=0, second=0, microsecond=0)
 
@@ -31,9 +37,18 @@ async def fetch_prices(price_area: str, product: str):
 
 if __name__ == "__main__":
     try:
-        import json
+        import sys
+        import asyncio
 
-        data = fetch_prices(price_area="DK1", product="groen_ok_el_spot")
-        print(json.dumps(data, indent=2))
+        async def main():
+            import json
+
+            data = await fetch_prices(price_area="DK1", product="groen_ok_el_spot")
+            print(json.dumps(data, indent=2))
+
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+        asyncio.run(main())
     except Exception as e:
         print(e, file=sys.stderr)
