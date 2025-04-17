@@ -77,8 +77,9 @@ async def get_companies():
                     f"Could not get spot prices from API. [status={res.status}, body={await res.text()}]"
                 )
 
-            return res.json()
+            return await res.json()
 
 
-def get_zones():
+async def get_zones():
+    # Hardcoded for now - shouldn't change.. But just in case, it's been prepared for async
     return ["DK1", "DK2"]

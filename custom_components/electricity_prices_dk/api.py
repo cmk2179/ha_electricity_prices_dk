@@ -21,22 +21,12 @@ async def fetch_prices(price_area: str, product: str):
     print(f"From: {start_date_str}")
     print(f"To: {end_date_str}")
 
-    return get_spot_prices(
+    return await get_spot_prices(
         price_area=price_area,
         product=product,
         from_date=start_date_str,
         to_date=end_date_str,
     )
-
-
-# TODO: Fetch a list of companies from the API - this list includes products
-def fetch_companies():
-    pass
-
-
-# Hardcoded for now - shouldn't change..
-def fetch_zones():
-    return ["DK1", "DK2"]
 
 
 if __name__ == "__main__":
