@@ -2,6 +2,8 @@ import voluptuous as vol
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.core import callback
 import logging
+from awesomeversion import AwesomeVersion
+from homeassistant.const import __version__ as HAVERSION
 from homeassistant.config_entries import ConfigEntry, OptionsFlow, ConfigFlow
 from custom_components.electricity_prices_dk.http_api import get_companies, get_zones
 
@@ -90,7 +92,11 @@ class ElectricityPricesOptionsFlowHandler(OptionsFlow):
     MINOR_VERSION = 0
 
     def __init__(self, config_entry: ConfigEntry):
-        self.config_entry = config_entry
+        # To ensure backwards compatibility, we should set the config_entry manually for older versions.
+        # For newer versions it's available as a read only property.
+        # See https://github.com/home-assistant/core/pull/129562
+        if AwesomeVersion(HAVERSION) < "2024.11.99":
+            self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
