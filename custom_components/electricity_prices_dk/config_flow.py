@@ -110,7 +110,7 @@ class ElectricityPricesOptionsFlowHandler(OptionsFlow):
         self._products = self._get_products(company_id)
         products = {}
         for product in self._products:
-            products[product["_id"]] = product["name"]
+            products[product["id"]] = product["name"]
 
         zones = await get_zones()
 

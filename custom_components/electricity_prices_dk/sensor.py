@@ -56,7 +56,10 @@ class ElectricityPriceSensor(SensorEntity):
                 data = await fetch_prices(
                     price_area=self._zone, product=self._product_id
                 )
-                self._attr_extra_state_attributes["hourly_prices"] = data["prices"]
+                self._attr_extra_state_attributes["hourly_prices"] = map(
+                    lambda p: {"date": p["date"], "price": p["price"]["total"]},
+                    data["prices"],
+                )
                 self._state = data["prices"][0]["price"]["total"] if data else None
         except Exception as e:
             _LOGGER.error(f"Failed to fetch electricity prices: {e}")
@@ -80,7 +83,7 @@ class CheapestHourSensor(SensorEntity):
     def async_update_state(self):
         data = self._price_sensor.extra_state_attributes.get("hourly_prices")
         if data:
-            cheapest = min(data, key=lambda x: x["price"]["total"])
+            cheapest = min(data, key=lambda x: x["price"])
             self._state = cheapest["date"]
         else:
             self._state = None
