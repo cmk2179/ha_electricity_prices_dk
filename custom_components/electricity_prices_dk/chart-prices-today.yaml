@@ -1,0 +1,17 @@
+type: custom:apexcharts-card
+header:
+  title: Electricity Prices (Today)
+  show: true
+graph_span: 24h
+span:
+  start: day
+series:
+  - entity: sensor.electricity_prices
+    type: column
+    float_precision: 2
+    name: Price
+    data_generator: |
+      return entity.attributes.hourly_prices.map(item => {
+        return [new Date(item.date), item.price];
+      });
+    unit: DKK/kWh
