@@ -1,7 +1,7 @@
 {
-  "domain": "electricity_prices",
+  "domain": "electricity_prices_dk",
   "name": "Electricity Prices",
-  "version": "1.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/cmk2179/ha_electricity_prices_dk",
   "issue_tracker": "https://github.com/cmk2179/ha_electricity_prices_dk/issues",
   "dependencies": [],

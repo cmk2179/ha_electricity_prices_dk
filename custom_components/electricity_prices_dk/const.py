@@ -16,5 +16,5 @@
 
 from zoneinfo import ZoneInfo
 
-DOMAIN = "electricity_prices"
+DOMAIN = "electricity_prices_dk"
 LOCAL_TZ = ZoneInfo("Europe/Copenhagen")
