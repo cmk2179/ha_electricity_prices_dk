@@ -23,7 +23,7 @@ from homeassistant.const import __version__ as HAVERSION
 from homeassistant.config_entries import ConfigEntry, OptionsFlow, ConfigFlow
 from custom_components.electricity_prices_dk.http_api import get_companies, get_zones
 
-from .consts import DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

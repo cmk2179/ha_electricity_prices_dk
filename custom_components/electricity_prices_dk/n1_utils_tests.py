@@ -18,7 +18,7 @@ import unittest
 from itertools import chain
 from datetime import datetime
 from n1_utils import get_tarif_for_hour
-from consts import LOCAL_TZ
+from const import LOCAL_TZ
 
 
 class N1UtilsTests(unittest.TestCase):

@@ -20,10 +20,10 @@ from zoneinfo import ZoneInfo
 
 if __package__ is None or __package__ == "":
     from http_api import get_spot_prices
-    from consts import LOCAL_TZ
+    from const import LOCAL_TZ
 else:
     from .http_api import get_spot_prices
-    from .consts import LOCAL_TZ
+    from .const import LOCAL_TZ
 
 
 async def fetch_prices(price_area: str, product: str):

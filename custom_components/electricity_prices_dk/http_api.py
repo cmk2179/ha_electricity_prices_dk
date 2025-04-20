@@ -20,10 +20,10 @@ import aiohttp
 
 if __package__ is None or __package__ == "":
     from n1_utils import get_tarif_for_hour, get_n1_tarifs
-    from consts import LOCAL_TZ
+    from const import LOCAL_TZ
 else:
     from .n1_utils import get_tarif_for_hour, get_n1_tarifs
-    from .consts import LOCAL_TZ
+    from .const import LOCAL_TZ
 
 API_BASE = "https://stromligning.dk/api"
 

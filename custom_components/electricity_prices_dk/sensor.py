@@ -23,7 +23,7 @@ from homeassistant.config_entries import ConfigEntry
 import async_timeout
 import logging
 from .api import fetch_prices
-from .consts import DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
