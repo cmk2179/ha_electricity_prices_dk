@@ -4,7 +4,7 @@ A Homeassistant integration that makes electricity prices available in Homeassis
 
 # Attribution
 
-Most prices are retrieved from Strømligning - please refer to their usage guide and documentation: https://stromligning.dk/api
+Most prices are retrieved from Strømligning - please refer to their usage guide and documentation: https://stromligning.dk/api/docs/
 
 Distribution prices are fetched from N1s website: https://n1.dk/gaeldende-priser
 
