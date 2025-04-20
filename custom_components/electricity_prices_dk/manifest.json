@@ -2,9 +2,11 @@
   "domain": "electricity_prices",
   "name": "Electricity Prices",
   "version": "1.0",
-  "documentation": "",
+  "documentation": "https://github.com/cmk2179/ha_electricity_prices_dk",
+  "issue_tracker": "https://github.com/cmk2179/ha_electricity_prices_dk/issues",
   "dependencies": [],
   "codeowners": ["@cmk2179"],
   "config_flow": true,
-  "requirements": ["beautifulsoup4", "aiohttp", "tzdata", "awesomeversion"]
+  "requirements": ["beautifulsoup4", "aiohttp", "tzdata", "awesomeversion"],
+  "quality_scale": "No score"
 }
