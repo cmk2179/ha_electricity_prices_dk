@@ -14,9 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime, timedelta
+from statistics import mean
+from typing import List, Dict, Optional
+from datetime import datetime, timedelta, time
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import (
+    async_track_point_in_time,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.config_entries import ConfigEntry
@@ -40,15 +44,38 @@ async def async_setup_entry(
     data = hass.data[DOMAIN][entry.entry_id]
     sensor = ElectricityPriceSensor(data["product"], data["zone"])
     cheapest_sensor = CheapestHourSensor(sensor)
+    cheapest_sensor_2h = CheapestHourSpan2hSensor(sensor)
+    cheapest_sensor_3h = CheapestHourSpan3hSensor(sensor)
 
-    async_add_entities([sensor, cheapest_sensor])
+    async_add_entities(
+        [sensor, cheapest_sensor, cheapest_sensor_2h, cheapest_sensor_3h]
+    )
+
+    def schedule_fetch(at_time: time):
+        now = datetime.now()
+        next_run = datetime.combine(now.date(), at_time)
+        if next_run < now:
+            next_run += timedelta(days=1)
+        async_track_point_in_time(hass, fetch_data_at, next_run)
 
     async def update_data(_now):
         await sensor.async_update_data()
         cheapest_sensor.async_update_state()
+        cheapest_sensor_2h.async_update_state()
+        cheapest_sensor_3h.async_update_state()
 
+    async def fetch_data_at(time):
+        await update_data(time)
+        # Re-schedule for next day
+        next_run = time + timedelta(days=1)
+        async_track_point_in_time(hass, fetch_data_at, next_run)
+
+    # Schedule fetches at 00:00 and 13:30
+    schedule_fetch(time(0, 0))
+    schedule_fetch(time(13, 30))
+
+    # Fetch now
     await update_data(datetime.now())
-    async_track_time_interval(hass, update_data, timedelta(hours=2))
 
     _LOGGER.info("Entities have been added")
 
@@ -112,3 +139,85 @@ class CheapestHourSensor(SensorEntity):
     @property
     def native_value(self):
         return self._state
+
+
+class CheapestHourSpan2hSensor(SensorEntity):
+    def __init__(self, price_sensor: ElectricityPriceSensor):
+        self._attr_name = "Cheapest Hour Span (2 hours)"
+        self._attr_unique_id = "{DOMAIN}_cheapest_hour_span_2h"
+        self._state = None
+        self._price_sensor = price_sensor
+        self._attr_extra_state_attributes = {}
+
+    def async_update_state(self):
+        data = self._price_sensor.extra_state_attributes.get("hourly_prices")
+        if data:
+            cheapest_span = _find_cheapest_hour_span(data, 2)
+            self._state = cheapest_span["avg_price"]
+            self._attr_extra_state_attributes = cheapest_span
+        else:
+            self._state = None
+        self.async_schedule_update_ha_state()
+
+    @property
+    def native_value(self):
+        return self._state
+
+
+class CheapestHourSpan3hSensor(SensorEntity):
+    def __init__(self, price_sensor: ElectricityPriceSensor):
+        self._attr_name = "Cheapest Hour Span (3 hours)"
+        self._attr_unique_id = "{DOMAIN}_cheapest_hour_span_3h"
+        self._state = None
+        self._price_sensor = price_sensor
+        self._attr_extra_state_attributes = {}
+
+    def async_update_state(self):
+        data = self._price_sensor.extra_state_attributes.get("hourly_prices")
+        if data:
+            cheapest_span = _find_cheapest_hour_span(data, 3)
+            self._state = cheapest_span["avg_price"]
+            self._attr_extra_state_attributes = cheapest_span
+        else:
+            self._state = None
+        self.async_schedule_update_ha_state()
+
+    @property
+    def native_value(self):
+        return self._state
+
+
+def _find_cheapest_hour_span(data: List[Dict], span_hours: int) -> Optional[Dict]:
+    """
+    Finds the cheapest consecutive hour span.
+
+    Args:
+        data: List of dicts with 'datetime' and 'price' keys
+        span_hours: Number of consecutive hours in the span
+
+    Returns:
+        A dict with 'start', 'end', 'total_price', 'avg_price', and 'entries' of the span
+    """
+    if len(data) < span_hours:
+        return None
+
+    cheapest_span = None
+    min_total = float("inf")
+
+    for i in range(len(data) - span_hours + 1):
+        window = data[i : i + span_hours]
+        prices = list(entry["price"] for entry in window)
+        total = sum(prices)
+        avg_price = mean(prices)
+
+        if total < min_total:
+            min_total = total
+            cheapest_span = {
+                "start": window[0]["date"],
+                "end": window[-1]["date"],
+                "avg_price": avg_price,
+                "total_price": total,
+                "entries": window,
+            }
+
+    return cheapest_span
