@@ -4,6 +4,6 @@
   "country": "DK",
   "homeassistant": "2024.4.0",
   "codeowners": ["@cmk2179"],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "documentation": "https://github.com/cmk2179/ha_electricity_prices_dk"
 }
