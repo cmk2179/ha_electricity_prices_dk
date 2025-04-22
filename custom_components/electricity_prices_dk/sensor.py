@@ -18,9 +18,7 @@ from statistics import mean
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta, time
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.event import (
-    async_track_point_in_time,
-)
+from homeassistant.helpers.event import async_track_time_change
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.config_entries import ConfigEntry
@@ -51,13 +49,6 @@ async def async_setup_entry(
         [sensor, cheapest_sensor, cheapest_sensor_2h, cheapest_sensor_3h]
     )
 
-    def schedule_fetch(at_time: time):
-        now = datetime.now()
-        next_run = datetime.combine(now.date(), at_time)
-        if next_run < now:
-            next_run += timedelta(days=1)
-        async_track_point_in_time(hass, fetch_data_at, next_run)
-
     async def update_data(_now):
         await sensor.async_update_data()
         cheapest_sensor.async_update_state()
@@ -66,13 +57,10 @@ async def async_setup_entry(
 
     async def fetch_data_at(time):
         await update_data(time)
-        # Re-schedule for next day
-        next_run = time + timedelta(days=1)
-        async_track_point_in_time(hass, fetch_data_at, next_run)
 
-    # Schedule fetches at 00:00 and 13:30
-    schedule_fetch(time(0, 0))
-    schedule_fetch(time(13, 30))
+    # Schedule recurring fetches at 00:00 and 13:30
+    async_track_time_change(hass, update_data, 0, 0)
+    async_track_time_change(hass, update_data, 13, 30)
 
     # Fetch now
     await update_data(datetime.now())
